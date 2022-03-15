@@ -1,11 +1,13 @@
+ARG RHCOS_BASE_IMAGE=registry.ci.openshift.org/rhcos-devel/rhel-coreos:latest
+
 # Build a small Go program
-FROM registry.access.redhat.com/ubi8/ubi:latest as builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.17-openshift-4.10 AS builder
 WORKDIR /build
+ENV GOFLAGS=""
 COPY . .
-RUN yum -y install go-toolset
 RUN go build hello-world.go
 
-FROM registry.ci.openshift.org/coreos/walters-rhcos-ostreecontainer
+FROM $RHCOS_BASE_IMAGE
 # Inject our binary into the OS
 COPY --from=builder /build/hello-world /usr/bin
 # And add our unit file
